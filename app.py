@@ -1,44 +1,89 @@
 
-from calculator import sumar, restar, multiplicar, dividir
+from flask import Flask, request, render_template_string
+from calculadora import sumar, restar, multiplicar, dividir
+app = Flask(__name__)
 
+HTML = """
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #202938;
+            color: white;
+            display: flex;
+            justify-content: center;
+            padding-top: 70px;
+        }
+        .calculadora {
+            background: #334155;
+            padding: 30px;
+            border-radius: 15px;
+            width: 300px;
+            text-align: center;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            border-radius: 6px;
+            border: none;
+        }
+        button {
+            background: #38bdf8;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculadora">
+        <h1>Calculadora</h1>
+        <form method="POST">
+            <input type="number" step="any" name="a"
+                   placeholder="Primer número" required>
+            <input type="number" step="any" name="b"
+                   placeholder="Segundo número" required>
 
-def main():
-    while True:
-        print("\n=== CALCULADORA ===")
-        print("1. Sumar")
-        print("2. Restar")
-        print("3. Multiplicar")
-        print("4. Dividir")
-        print("5. Salir")
+            <select name="operacion">
+                <option value="sumar">Sumar</option>
+                <option value="restar">Restar</option>
+                <option value="multiplicar">Multiplicar</option>
+                <option value="dividir">Dividir</option>
+            </select>
 
-        opcion = input("Selecciona una opción: ")
+            <button type="submit">Calcular</button>
+        </form>
 
-        if opcion == "5":
-            print("Saliendo de la calculadora...")
-            break
+        {% if resultado is not none %}
+            <h2>Resultado: {{ resultado }}</h2>
+        {% endif %}
+    </div>
+</body>
+</html>
+"""
 
-        if opcion not in ["1", "2", "3", "4"]:
-            print("Opción no válida")
-            continue
+@app.route("/", methods=["GET", "POST"])
+def inicio():
+    resultado = None
 
-        try:
-            a = float(input("Primer número: "))
-            b = float(input("Segundo número: "))
-        except ValueError:
-            print("Debes ingresar números válidos")
-            continue
+    if request.method == "POST":
+        a = float(request.form["a"])
+        b = float(request.form["b"])
+        operacion = request.form["operacion"]
 
-        if opcion == "1":
+        if operacion == "sumar":
             resultado = sumar(a, b)
-        elif opcion == "2":
+        elif operacion == "restar":
             resultado = restar(a, b)
-        elif opcion == "3":
+        elif operacion == "multiplicar":
             resultado = multiplicar(a, b)
-        else:
+        elif operacion == "dividir":
             resultado = dividir(a, b)
 
-        print("Resultado:", resultado)
-
-
-if __name__ == "__main__":
-    main()
+    return render_template_string(HTML, resultado=resultado)
